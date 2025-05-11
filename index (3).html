@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecondBrain AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1F1F1F;
+            --text-light: #F1F1F1;
+            --accent-green: #4CAF50;
+            --accent-blue: #00BCD4;
+            --highlight-pink: #FF4081;
+            --highlight-yellow: #FFD54F;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-green);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary {
+            background-color: var(--accent-blue);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .highlight {
+            color: var(--highlight-yellow);
+        }
+        
+        .chat-message {
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .task-complete {
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #2D2D2D;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-blue);
+            border-radius: 4px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+            
+            .main-content {
+                margin-left: 0;
+                padding: 1rem;
+            }
+            
+            .tab-buttons {
+                flex-direction: row;
+                justify-content: space-around;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <div class="sidebar w-64 bg-gray-900 text-white p-4 flex flex-col">
+            <div class="flex items-center mb-8">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center mr-3">
+                    <span class="text-xl font-bold">SB</span>
+                </div>
+                <h1 class="text-xl font-bold">SecondBrain <span class="highlight">AI</span></h1>
+            </div>
+            
+            <div class="flex-1">
+                <div class="tab-buttons flex flex-col space-y-2 mb-6">
+                    <button onclick="switchTab('assistant')" class="tab-btn py-3 px-4 rounded-lg flex items-center bg-gray-800 hover:bg-gray-700 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        Personal Assistant
+                    </button>
+                    <button onclick="switchTab('tasks')" class="tab-btn py-3 px-4 rounded-lg flex items-center bg-gray-800 hover:bg-gray-700 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        To-Do Tasks
+                    </button>
+                    <button onclick="switchTab('database')" class="tab-btn py-3 px-4 rounded-lg flex items-center bg-gray-800 hover:bg-gray-700 transition">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                        </svg>
+                        Database Setup
+                    </button>
+                </div>
+                
+                <div class="mb-6">
+                    <h3 class="text-sm uppercase font-semibold text-gray-500 mb-2">Quick Actions</h3>
+                    <button onclick="quickAction('summary')" class="w-full py-2 px-4 rounded-lg flex items-center text-sm bg-gray-800 hover:bg-gray-700 mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        Daily Summary
+                    </button>
+                    <button onclick="quickAction('pending')" class="w-full py-2 px-4 rounded-lg flex items-center text-sm bg-gray-800 hover:bg-gray-700 mb-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Pending Tasks
+                    </button>
+                </div>
+                
+                <div class="mt-auto">
+                    <div class="bg-gray-800 rounded-lg p-3 mb-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs text-gray-400">Storage</span>
+                            <span class="text-xs">0% used</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-1.5">
+                        <div class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="text-center text-xs text-gray-500">
+                        SecondBrain AI v1.0
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content flex-1 overflow-auto p-8">
+            <!-- Personal Assistant Tab -->
+            <div id="assistant" class="tab-content active">
+                <div class="flex justify-between items-center mb-8">
+                    <h2 class="text-2xl font-bold">Personal Assistant</h2>
+                    <div class="bg-gray-800 px-4 py-2 rounded-lg">
+                        <span id="current-date" class="font-medium"></span>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Journal Entry Section -->
+                    <div class="bg-gray-800 rounded-xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Journal Entry</h3>
+                        
+                        <div class="mb-4">
+                            <label for="entry-heading" class="block text-sm font-medium text-gray-400 mb-1">Heading</label>
+                            <input type="text" id="entry-heading" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="What's on your mind?">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="entry-body" class="block text-sm font-medium text-gray-400 mb-1">Details</label>
+                            <textarea id="entry-body" rows="6" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Write your thoughts here..."></textarea>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="entry-tags" class="block text-sm font-medium text-gray-400 mb-1">Tags (comma separated)</label>
+                            <input type="text" id="entry-tags" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="work, ideas, personal">
+                        </div>
+                        
+                        <div class="flex justify-end">
+                            <button onclick="saveJournalEntry()" class="btn-primary px-6 py-2 rounded-lg flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24 stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                                </svg>
+                                Save & Summarize
+                            </button>
+                            </div>
+                        </div>
+                        
+                        <!-- AI Chat Section -->
+                        <div class="bg-gray-800 rounded-xl p-6 flex flex-col">
+                            <h3 class="text-lg font-semibold mb-4">AI Assistant</h3>
+                            
+                            <div id="chat-container" class="flex-1 overflow-y-auto mb-4 space-y-4 max-h-96">
+                                <div class="chat-message bg-gray-700 p-4 rounded-lg">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 bg-blue-500 rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-medium">SecondBrain AI</p>
+                                            <p class="text-sm">Hello! I'm your SecondBrain AI assistant. How can I help you today?</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex space-x-2 mb-3">
+                                <button onclick="quickQuestion('today')" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-full">What happened today?</button>
+                                <button onclick="quickQuestion('week')" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-full">Summarize my week</button>
+                                <button onclick="quickQuestion('yesterday')" class="text-xs bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded-full">What did I do yesterday?</button>
+                            </div>
+                            
+                            <div class="flex">
+                                <input type="text" id="chat-input" class="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ask me anything...">
+                                <button onclick="sendChatMessage()" class="btn-primary px-4 py-2 rounded-r-lg">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Entries -->
+                    <div class="mt-8">
+                        <h3 class="text-xl font-semibold mb-4">Recent Journal Entries</h3>
+                        <div id="recent-entries" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <!-- Entries will be added here from database -->
+                            <div class="bg-gray-800 rounded-lg p-4 text-center text-gray-500">
+                                No journal entries yet
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- To-Do Tasks Tab -->
+                <div id="tasks" class="tab-content">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold">To-Do Tasks</h2>
+                        <div class="flex items-center space-x-4">
+                            <input type="date" id="task-date" class="bg-gray-800 px-4 py-2 rounded-lg">
+                            <button onclick="addNewTask()" class="btn-primary px-4 py-2 rounded-lg flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                </svg>
+                                New Task
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Input Form (hidden by default) -->
+                    <div id="task-form" class="bg-gray-800 rounded-xl p-6 mb-8 hidden">
+                        <h3 class="text-lg font-semibold mb-4">Add New Task</h3>
+                        
+                        <div class="mb-4">
+                            <label for="task-title" class="block text-sm font-medium text-gray-400 mb-1">Title</label>
+                            <input type="text" id="task-title" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="What needs to be done?">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="task-description" class="block text-sm font-medium text-gray-400 mb-1">Description</label>
+                            <textarea id="task-description" rows="3" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Add details..."></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label for="task-priority" class="block text-sm font-medium text-gray-400 mb-1">Priority</label>
+                                <select id="task-priority" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    <option value="high">High</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="low">Low</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-sm font-medium text-gray-400 mb-1">Status</label>
+                                <div class="flex items-center space-x-4">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="task-status" value="incomplete" class="form-radio text-blue-500" checked>
+                                        <span class="ml-2">Incomplete</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="task-status" value="complete" class="form-radio text-green-500">
+                                        <span class="ml-2">Complete</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end space-x-3">
+                            <button onclick="cancelTask()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg">
+                                Cancel
+                            </button>
+                            <button onclick="saveTask()" class="btn-primary px-6 py-2 rounded-lg flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Save Task
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Filters -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex space-x-2">
+                            <button onclick="filterTasks('all')" class="px-3 py-1 bg-blue-500 text-white rounded-full text-sm">All</button>
+                            <button onclick="filterTasks('today')" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-full text-sm">Today</button>
+                            <button onclick="filterTasks('week')" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-full text-sm">This Week</button>
+                            <button onclick="filterTasks('high')" class="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-full text-sm">High Priority</button>
+                        </div>
+                        
+                        <div class="relative">
+                            <input type="text" id="task-search" class="pl-8 pr-4 py-1 bg-gray-700 border border-gray-600 rounded-full text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Search tasks...">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Tasks List -->
+                    <div id="tasks-list" class="space-y-3">
+                        <!-- Tasks will be added here from database -->
+                        <div class="bg-gray-800 rounded-lg p-4 text-center text-gray-500">
+                            No tasks yet. Add your first task!
+                        </div>
+                    </div>
+                    
+                    <!-- AI Task Suggestions -->
+                    <div class="mt-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-semibold">AI Suggestions</h3>
+                            <button onclick="generateWeeklyPlan()" class="btn-secondary px-4 py-2 rounded-lg flex items-center text-sm">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                Generate Weekly Plan
+                            </button>
+                        </div>
+                        
+                        <div id="ai-suggestions" class="bg-gray-800 rounded-xl p-4">
+                            <p class="text-gray-400">AI suggestions will appear here based on your task patterns and priorities.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Database Connection Tab (Cleared) -->
+                <div id="database" class="tab-content">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold">Database Connection</h2>
+                        <div class="bg-gray-800 px-4 py-2 rounded-lg">
+                            <span id="db-status" class="font-medium text-red-500">Disconnected</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-800 rounded-xl p-8 text-center">
+                        <div class="max-w-md mx-auto">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                            </svg>
+                            <h3 class="text-xl font-semibold mb-2">Database Connection</h3>
+                            <p class="text-gray-400 mb-6">This feature is currently under development and will be available soon.</p>
+                            <button class="btn-primary px-6 py-2 rounded-lg opacity-50 cursor-not-allowed">
+                                Coming Soon
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            // Initialize the app
+            document.addEventListener('DOMContentLoaded', function() {
+                // Set current date
+                const now = new Date();
+                document.getElementById('current-date').textContent = formatDate(now);
+                document.getElementById('task-date').valueAsDate = now;
+                
+                // Set up event listeners
+                document.getElementById('task-search').addEventListener('input', function() {
+                    searchTasks(this.value);
+                });
+                
+                // Initialize empty state
+                updateEmptyStates();
+            });
+            
+            // Tab switching
+            function switchTab(tabName) {
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+                document.getElementById(tabName).classList.add('active');
+                
+                // Update active tab button style
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('bg-blue-900');
+                    btn.classList.add('bg-gray-800');
+                });
+                
+                // Highlight the active tab button
+                const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => 
+                    btn.textContent.includes(tabName === 'assistant' ? 'Personal Assistant' : 
+                                          tabName === 'tasks' ? 'To-Do Tasks' : 'Database Setup')
+                );
+                if (activeBtn) {
+                    activeBtn.classList.remove('bg-gray-800');
+                    activeBtn.classList.add('bg-blue-900');
+                }
+            }
+            
+            // Format date for display
+            function formatDate(date) {
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                return date.toLocaleDateString('en-US', options);
+            }
+            
+            // Journal Entry Functions
+            function saveJournalEntry() {
+                const heading = document.getElementById('entry-heading').value;
+                const body = document.getElementById('entry-body').value;
+                const tags = document.getElementById('entry-tags').value;
+                
+                if (!heading || !body) {
+                    showNotification('Please fill in both heading and body', 'error');
+                    return;
+                }
+                
+                // In a real app, this would call your API to save to PostgreSQL
+                // and get an AI summary from OpenRouter
+                showNotification('Saving your journal entry...', 'info');
+                
+                // Clear form
+                document.getElementById('entry-heading').value = '';
+                document.getElementById('entry-body').value = '';
+                document.getElementById('entry-tags').value = '';
+                
+                // Update UI will happen after successful API response
+            }
+            
+            function addJournalEntryToUI(entry) {
+                // This would be called after successful API response
+                const entryElement = document.createElement('div');
+                entryElement.className = 'bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition cursor-pointer';
+                entryElement.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-medium">${entry.heading}</h4>
+                        <span class="text-xs text-gray-400">${new Date(entry.date).toLocaleDateString()}</span>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-3 line-clamp-2">${entry.body.substring(0, 100)}...</p>
+                    <div class="flex flex-wrap gap-1">
+                        ${entry.tags.filter(tag => tag).map(tag => 
+                            `<span class="text-xs px-2 py-1 bg-gray-700 rounded-full">${tag}</span>`
+                        ).join('')}
+                    </div>
+                `;
+                
+                // Prepend to recent entries
+                const recentEntries = document.getElementById('recent-entries');
+                if (recentEntries.firstChild && recentEntries.firstChild.classList.contains('text-gray-500')) {
+                    recentEntries.innerHTML = '';
+                }
+                recentEntries.prepend(entryElement);
+            }
+            
+            // Chat Functions
+            function sendChatMessage() {
+                const input = document.getElementById('chat-input');
+                const message = input.value.trim();
+                
+                if (!message) return;
+                
+                // Add user message to chat
+                addChatMessage('You', message, true);
+                
+                // Clear input
+                input.value = '';
+                
+                // In a real app, this would call your API to get response from OpenRouter
+                // The response would be added in the API callback
+            }
+            
+            function addChatMessage(sender, message, isUser = false) {
+                const chatContainer = document.getElementById('chat-container');
+                const messageElement = document.createElement('div');
+                messageElement.className = `chat-message ${isUser ? 'bg-blue-900 bg-opacity-30' : 'bg-gray-700'} p-4 rounded-lg`;
+                messageElement.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="flex-shrink-0 ${isUser ? 'bg-blue-500' : 'bg-blue-500'} rounded-full w-8 h-8 flex items-center justify-center mr-3">
+                            ${isUser ? 
+                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>' : 
+                                '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>'}
+                        </div>
+                        <div>
+                            <p class="font-medium">${sender}</p>
+                            <p class="text-sm">${message}</p>
+                        </div>
+                    </div>
+                `;
+                
+                chatContainer.appendChild(messageElement);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            function quickQuestion(type) {
+                let question = '';
+                
+                switch(type) {
+                    case 'today':
+                        question = "What happened today?";
+                        break;
+                    case 'week':
+                        question = "Summarize my week";
+                        break;
+                    case 'yesterday':
+                        question = "What did I do yesterday?";
+                        break;
+                }
+                
+                addChatMessage('You', question, true);
+                
+                // In a real app, this would call your API to query the database
+                // and get a response from OpenRouter
+            }
+            
+            // Task Functions
+            function addNewTask() {
+                document.getElementById('task-form').classList.remove('hidden');
+                document.getElementById('task-title').focus();
+            }
+            
+            function cancelTask() {
+                document.getElementById('task-form').classList.add('hidden');
+                // Clear form
+                document.getElementById('task-title').value = '';
+                document.getElementById('task-description').value = '';
+                document.getElementById('task-priority').value = 'medium';
+                document.querySelector('input[name="task-status"][value="incomplete"]').checked = true;
+            }
+            
+            function saveTask() {
+                const title = document.getElementById('task-title').value;
+                const description = document.getElementById('task-description').value;
+                const priority = document.getElementById('task-priority').value;
+                const status = document.querySelector('input[name="task-status"]:checked').value;
+                const date = document.getElementById('task-date').valueAsDate;
+                
+                if (!title) {
+                    showNotification('Please add a task title', 'error');
+                    return;
+                }
+                
+                // In a real app, this would call your API to save to PostgreSQL
+                showNotification('Saving task...', 'info');
+                
+                // Clear form and hide it
+                cancelTask();
+                
+                // Update UI will happen after successful API response
+            }
+            
+            function addTaskToUI(task) {
+                // This would be called after successful API response
+                const taskElement = document.createElement('div');
+                taskElement.className = `bg-gray-800 rounded-lg p-4 ${task.status === 'complete' ? 'task-complete' : ''}`;
+                taskElement.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-start">
+                            <input type="checkbox" ${task.status === 'complete' ? 'checked' : ''} 
+                                onchange="toggleTaskComplete(${task.id}, this)" 
+                                class="mt-1 form-checkbox h-5 w-5 ${getPriorityColor(task.priority)} rounded focus:ring-0">
+                            <div class="ml-3">
+                                <h4 class="font-medium">${task.title}</h4>
+                                ${task.description ? `<p class="text-sm text-gray-300 mt-1">${task.description}</p>` : ''}
+                                <div class="flex items-center mt-2 space-x-3 text-xs">
+                                    <span>${new Date(task.date).toLocaleDateString()}</span>
+                                    <span class="px-2 py-0.5 ${getPriorityColor(task.priority)} bg-opacity-20 rounded-full">${task.priority}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="deleteTask(${task.id})" class="text-gray-500 hover:text-red-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                const tasksList = document.getElementById('tasks-list');
+                if (tasksList.firstChild && tasksList.firstChild.classList.contains('text-gray-500')) {
+                    tasksList.innerHTML = '';
+                }
+                tasksList.appendChild(taskElement);
+            }
+            
+            function getPriorityColor(priority) {
+                switch(priority) {
+                    case 'high': return 'text-red-500';
+                    case 'medium': return 'text-yellow-500';
+                    case 'low': return 'text-green-500';
+                    default: return 'text-gray-500';
+                }
+            }
+            
+            function toggleTaskComplete(taskId, checkbox) {
+                // In a real app, this would call your API to update the task status
+                const taskElement = checkbox.closest('.bg-gray-800');
+                if (checkbox.checked) {
+                    taskElement.classList.add('task-complete');
+                } else {
+                    taskElement.classList.remove('task-complete');
+                }
+            }
+            
+            function deleteTask(taskId) {
+                // In a real app, this would call your API to delete the task
+                const taskElement = document.querySelector(`[onclick="deleteTask(${taskId})"]`).closest('.bg-gray-800');
+                taskElement.classList.add('opacity-0', 'transition', 'duration-300');
+                
+                setTimeout(() => {
+                    taskElement.remove();
+                    updateEmptyStates();
+                }, 300);
+            }
+            
+            function filterTasks(filter) {
+                // In a real app, this would call your API to filter tasks
+                showNotification(`Filtering ${filter} tasks...`, 'info');
+            }
+            
+            function searchTasks(query) {
+                // In a real app, this would call your API to search tasks
+                if (query.length > 2) {
+                    showNotification(`Searching for: ${query}`, 'info');
+                }
+            }
+            
+            function generateWeeklyPlan() {
+                // In a real app, this would call OpenRouter API to generate suggestions
+                showNotification('Generating weekly plan...', 'info');
+            }
+            
+            // Quick Actions
+            function quickAction(action) {
+                switch(action) {
+                    case 'summary':
+                        switchTab('assistant');
+                        quickQuestion('today');
+                        break;
+                    case 'pending':
+                        switchTab('tasks');
+                        filterTasks('today');
+                        break;
+                }
+            }
+            
+            // Update empty states
+            function updateEmptyStates() {
+                // Journal entries
+                const recentEntries = document.getElementById('recent-entries');
+                if (recentEntries.children.length === 0) {
+                    recentEntries.innerHTML = `
+                        <div class="bg-gray-800 rounded-lg p-4 text-center text-gray-500">
+                            No journal entries yet
+                        </div>
+                    `;
+                }
+                
+                // Tasks
+                const tasksList = document.getElementById('tasks-list');
+                if (tasksList.children.length === 0) {
+                    tasksList.innerHTML = `
+                        <div class="bg-gray-800 rounded-lg p-4 text-center text-gray-500">
+                            No tasks yet. Add your first task!
+                        </div>
+                    `;
+                }
+            }
+            
+            // Notification system
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg flex items-center ${
+                    type === 'error' ? 'bg-red-500' : 
+                    type === 'success' ? 'bg-green-500' : 
+                    type === 'info' ? 'bg-blue-500' : 'bg-gray-700'
+                } text-white animate-bounce`;
+                notification.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    ${message}
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.remove('animate-bounce');
+                    notification.classList.add('opacity-0', 'transition', 'duration-500');
+                    setTimeout(() => notification.remove(), 500);
+                }, 3000);
+            }
+        </script>
+    <p style="border-radius: 8px; text-align: center; font-size: 12px; color: #fff; margin-top: 16px;position: fixed; left: 8px; bottom: 8px; z-index: 10; background: rgba(0, 0, 0, 0.8); padding: 4px 8px;">Made with <img src="https://enzostvs-deepsite.hf.space/logo.svg" alt="DeepSite Logo" style="width: 16px; height: 16px; vertical-align: middle;display:inline-block;margin-right:3px;filter:brightness(0) invert(1);"><a href="https://enzostvs-deepsite.hf.space" style="color: #fff;text-decoration: underline;" target="_blank" >DeepSite</a> - 🧬 <a href="https://enzostvs-deepsite.hf.space?remix=abyshajan29/second-brain" style="color: #fff;text-decoration: underline;" target="_blank" >Remix</a></p></body>
+</html>
